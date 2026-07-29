@@ -1,0 +1,296 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://972026-skill-library.github.io/config/household-geothermal-heating-config.json",
+  "title": "Household Geothermal Heating Skill Configuration",
+  "description": "Production-grade configuration for household-geothermal-heating skill v1.0.0",
+  "type": "object",
+  "config_version": "1.0.0",
+  "system": {
+    "skill_name": "household-geothermal-heating",
+    "skill_version": "1.0.0",
+    "domain": "Small-Scale Geothermal Heat Pump Engineering",
+    "entry_point": "skills/main.md",
+    "default_language": "auto",
+    "supported_languages": ["en", "vi"],
+    "max_execution_time_seconds": 120,
+    "max_tokens_per_run": 15000,
+    "enable_caching": true,
+    "cache_ttl_seconds": 3600
+  },
+  "tools": {
+    "web_search": {
+      "enabled": true,
+      "max_results": 10,
+      "timeout_seconds": 30,
+      "retry_attempts": 3,
+      "rate_limit_per_minute": 10
+    },
+    "web_fetch": {
+      "enabled": true,
+      "timeout_seconds": 30,
+      "retry_attempts": 3,
+      "max_response_size_mb": 5,
+      "rate_limit_per_minute": 20
+    },
+    "knowledge_base": {
+      "enabled": true,
+      "path": "SECOND-KNOWLEDGE-BRAIN.md",
+      "max_entries_returned": 20,
+      "cache_enabled": true
+    }
+  },
+  "quality_gates": {
+    "universal": {
+      "U1": {
+        "name": "Minimum Sources",
+        "description": "At least 3 sources cited, 1 academic/authoritative",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 2,
+        "fallback": "knowledge_base"
+      },
+      "U2": {
+        "name": "Disclosure Before Recommendation",
+        "description": "Risk/limitation disclosure appears before recommendation",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 2,
+        "fallback": "prepend_standard_disclosure"
+      },
+      "U3": {
+        "name": "Evidence Hierarchy",
+        "description": "Evidence tier stated per source (Tier 1-4)",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 2,
+        "fallback": "annotate_tiers"
+      },
+      "U4": {
+        "name": "Language Match",
+        "description": "Output language matches user preference",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 1,
+        "fallback": "translate_output"
+      },
+      "U5": {
+        "name": "Output Template",
+        "description": "All mandatory sections present",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 2,
+        "fallback": "reformat_to_template"
+      },
+      "U6": {
+        "name": "Claim Traceability",
+        "description": "Every claim traceable to source or flagged",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 2,
+        "fallback": "flag_unsupported_claims"
+      }
+    },
+    "domain": {
+      "G1": {
+        "name": "Requirements Complete",
+        "description": "Object, location, building parameters confirmed",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 2,
+        "fallback": "proceed_with_defaults"
+      },
+      "G2": {
+        "name": "Evidence Collected",
+        "description": "Current data + 1 authoritative doc retrieved",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 2,
+        "fallback": "limitation_flag"
+      },
+      "G3": {
+        "name": "Heating Load Computed",
+        "description": "Load calculated using ASHRAE methods",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 2,
+        "fallback": "document_calculation_method"
+      },
+      "G4": {
+        "name": "Ground Loop Sized",
+        "description": "Loop sized based on load and soil conditions",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 2,
+        "fallback": "document_sizing_assumptions"
+      },
+      "G5": {
+        "name": "COP/Economics Quantified",
+        "description": "Efficiency and payback calculated",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 2,
+        "fallback": "provide_sensitivity_analysis"
+      },
+      "G6": {
+        "name": "O&M Planned",
+        "description": "Operation and maintenance plan provided",
+        "enabled": true,
+        "auto_fix": true,
+        "max_retries": 2,
+        "fallback": "include_maintenance_tasks"
+      }
+    }
+  },
+  "graceful_degradation": {
+    "levels": {
+      "0": {
+        "name": "Full",
+        "condition": "All primary sources reachable",
+        "banner": false
+      },
+      "1": {
+        "name": "Reduced",
+        "condition": "Some primary sources fail",
+        "banner": true,
+        "message": "Some primary sources unavailable; using secondary sources with flags"
+      },
+      "2": {
+        "name": "Historical",
+        "condition": "Most live sources fail",
+        "banner": true,
+        "message": "Limited live data; using historical knowledge base"
+      },
+      "3": {
+        "name": "Partial",
+        "condition": "Required input missing/stale",
+        "banner": true,
+        "message": "Some required inputs unavailable; marked as DATA UNAVAILABLE"
+      },
+      "4": {
+        "name": "Unavailable",
+        "condition": "All sources and knowledge base fail",
+        "banner": true,
+        "message": "DATA UNAVAILABLE; cannot generate reliable output"
+      }
+    }
+  },
+  "error_handling": {
+    "source_timeout": {
+      "severity": "warning",
+      "max_retries": 3,
+      "backoff_strategy": "exponential",
+      "fallback": "alternate_source"
+    },
+    "invalid_input": {
+      "severity": "error",
+      "max_retries": 2,
+      "fallback": "user_confirmation"
+    },
+    "missing_input": {
+      "severity": "warning",
+      "max_retries": 0,
+      "fallback": "default_plus_flag"
+    },
+    "stale_reading": {
+      "severity": "warning",
+      "max_retries": 1,
+      "fallback": "refresh_request"
+    },
+    "knowledge_base_miss": {
+      "severity": "warning",
+      "max_retries": 2,
+      "fallback": "websearch_gap_fill"
+    },
+    "conflicting_actions": {
+      "severity": "error",
+      "max_retries": 0,
+      "fallback": "precedence_rules"
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "structured",
+    "handlers": {
+      "console": {
+        "enabled": true,
+        "format": "json",
+        "timestamp_format": "iso8601"
+      },
+      "file": {
+        "enabled": true,
+        "path": "logs/skill_execution.log",
+        "max_size_mb": 10,
+        "backup_count": 5,
+        "format": "json"
+      }
+    },
+    "events": {
+      "log_all_events": false,
+      "log_threshold": "INFO",
+      "include_context": true,
+      "include_error_details": true
+    }
+  },
+  "performance": {
+    "target_execution_time_seconds": 60,
+    "target_tokens_per_run": 10000,
+    "target_gate_pass_rate": 0.95,
+    "target_source_success_rate": 0.8,
+    "enable_profiling": false,
+    "profiling_sample_rate": 0.1
+  },
+  "features": {
+    "multi_language_support": true,
+    "graceful_degradation": true,
+    "knowledge_base_caching": true,
+    "structured_logging": true,
+    "performance_monitoring": true,
+    "experimental_ml_optimization": false
+  },
+  "knowledge_updater": {
+    "enabled": true,
+    "script_path": "tools/knowledge_updater.py",
+    "schedule": {
+      "weekly_academic": {
+        "enabled": true,
+        "cron": "0 8 * * 1",
+        "timezone": "UTC"
+      },
+      "daily_news": {
+        "enabled": true,
+        "cron": "0 7 * * *",
+        "timezone": "UTC"
+      }
+    },
+    "sources": {
+      "arxiv_categories": ["physics.flu-dyn", "cond-mat", "cs.CE"],
+      "semantic_scholar_keywords": [
+        "ground source heat pump",
+        "geothermal loop",
+        "GSHP design",
+        "borehole thermal resistance"
+      ],
+      "rss_feeds": []
+    },
+    "scoring": {
+      "recency_weight": 0.3,
+      "relevance_weight": 0.5,
+      "citation_weight": 0.2,
+      "min_score": 5.0,
+      "max_entries_per_run": 20
+    }
+  },
+  "validation": {
+    "enable_input_validation": true,
+    "enable_output_validation": true,
+    "strict_mode": false,
+    "validation_schema_path": "config/schemas/"
+  },
+  "metadata": {
+    "config_created": "2026-07-27",
+    "config_updated": "2026-07-27",
+    "config_version": "1.0.0",
+    "compatible_skill_version": "1.0.0",
+    "maintenance_status": "active"
+  }
+}

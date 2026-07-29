@@ -1,0 +1,25 @@
+# household-geothermal-heating - Python Dependencies
+# Production-grade dependencies for knowledge update pipeline and testing
+
+# Core dependencies for knowledge crawler
+requests>=2.31.0              # HTTP client with retry logic
+feedparser>=6.0.10            # RSS feed parsing
+python-dateutil>=2.8.2        # Date parsing for various formats
+
+# Optional but recommended dependencies
+tenacity>=8.2.3                # Retry logic with exponential backoff
+
+# Testing dependencies
+pytest>=7.4.3                  # Testing framework
+pytest-cov>=4.1.0              # Code coverage
+pytest-mock>=3.12.0            # Mock support for pytest
+
+# Development dependencies
+black>=23.12.0                 # Code formatting
+flake8>=6.1.0                  # Linting
+mypy>=1.7.1                    # Type checking
+isort>=5.13.2                  # Import sorting
+
+# Documentation
+sphinx>=7.2.6                  # Documentation generation
+sphinx-rtd-theme>=2.0.0       # ReadTheDocs theme
